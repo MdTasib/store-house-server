@@ -25,28 +25,43 @@ async function run() {
 		await client.connect();
 		const itemCollection = client.db("storeHouse").collection("items");
 
+		// get all data
+		app.get("/products", async (req, res) => {
+			const products = await itemCollection.find({}).toArray();
+			res.send(products);
+		});
+
 		// user is login, then generate a jwt token
 		app.post("/login", async (req, res) => {
 			const email = req.body;
+			console.log(email);
 			const token = jwt.sign(email, process.env.JWT_TOKEN);
 			res.send({ token });
 		});
+
 		// post data
 		app.post("/addItem", async (req, res) => {
 			const item = req.body;
-			const tokenInfo = req.headers.authorization;
-			const [email, accessToken] = tokenInfo.split(" ");
-
-			const decoded = verifyToken(accessToken);
-			console.log(decoded);
-
-			if (email === decoded.email) {
-				const result = await collection.insertOne(item);
-				res.send({ success: "Product uploaded successfully" });
-			} else {
-				res.send({ success: "UnAuthoraized Access" });
-			}
+			const result = await itemCollection.insertOne(item);
+			res.send(result);
 		});
+
+		// post data
+		// app.post("/addItem", async (req, res) => {
+		// 	const item = req.body;
+		// 	const tokenInfo = req.headers.authorization;
+		// 	const [email, accessToken] = tokenInfo.split(" ");
+
+		// 	const decoded = verifyToken(accessToken);
+		// 	console.log(email, decoded?.email);
+
+		// 	if (email === decoded.email) {
+		// 		const result = await itemCollection.insertOne(item);
+		// 		res.send({ success: "Product uploaded successfully" });
+		// 	} else {
+		// 		res.send({ success: "UnAuthoraized Access" });
+		// 	}
+		// });
 	} finally {
 	}
 }
