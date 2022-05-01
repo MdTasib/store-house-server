@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 5000;
@@ -46,22 +46,26 @@ async function run() {
 			res.send(result);
 		});
 
-		// post data
-		// app.post("/addItem", async (req, res) => {
-		// 	const item = req.body;
-		// 	const tokenInfo = req.headers.authorization;
-		// 	const [email, accessToken] = tokenInfo.split(" ");
+		// update single product
+		app.put("/product/:id", async (req, res) => {
+			const id = req.params.id;
+			const product = req.body;
+			const filter = { _id: ObjectId(id) };
+			const options = { upsert: true };
 
-		// 	const decoded = verifyToken(accessToken);
-		// 	console.log(email, decoded?.email);
+			const updateData = {
+				$set: {
+					quantity: product.userName,
+				},
+			};
 
-		// 	if (email === decoded.email) {
-		// 		const result = await itemCollection.insertOne(item);
-		// 		res.send({ success: "Product uploaded successfully" });
-		// 	} else {
-		// 		res.send({ success: "UnAuthoraized Access" });
-		// 	}
-		// });
+			const result = await itemCollection.updateOne(
+				filter,
+				updateData,
+				options
+			);
+			res.send(result);
+		});
 	} finally {
 	}
 }
@@ -69,18 +73,3 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, console.log("server running"));
-
-// verify token function
-function verifyToken(token) {
-	let email;
-	jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
-		if (err) {
-			email = "Invalid email";
-		}
-		if (decoded) {
-			console.log(decoded);
-			email = decoded;
-		}
-	});
-	return email;
-}
