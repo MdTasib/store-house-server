@@ -55,7 +55,7 @@ async function run() {
 
 			const updateData = {
 				$set: {
-					quantity: product.userName,
+					quantity: product.quantity,
 				},
 			};
 
@@ -64,6 +64,14 @@ async function run() {
 				updateData,
 				options
 			);
+			res.send(result);
+		});
+
+		// delete single data useing id
+		app.delete("/product/:id", async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: ObjectId(id) };
+			const result = await itemCollection.deleteOne(filter);
 			res.send(result);
 		});
 	} finally {
