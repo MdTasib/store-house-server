@@ -31,12 +31,12 @@ async function run() {
 			res.send(products);
 		});
 
-		// user is login, then generate a jwt token
-		app.post("/login", async (req, res) => {
-			const email = req.body;
-			console.log(email);
-			const token = jwt.sign(email, process.env.JWT_TOKEN);
-			res.send({ token });
+		// get all data
+		app.get("/productByEmail", async (req, res) => {
+			const email = req.query.email;
+			const filter = { email: email };
+			const products = await itemCollection.find(filter).toArray();
+			res.send(products);
 		});
 
 		// post data
